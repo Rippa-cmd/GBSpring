@@ -23,6 +23,28 @@ public class ProductServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        
+        List<Product> products = productRepository.findAll();
+
+        resp.getWriter().println("<table>");
+
+        resp.getWriter().println("<tr>");
+        resp.getWriter().println("<th>Product name</th>");
+        resp.getWriter().println("<th>Product name</th>");
+        resp.getWriter().println("<th>Product name</th>");
+        resp.getWriter().println("</tr>");
+        for (Product product : products) {
+            resp.getWriter().println("<tr>");
+            resp.getWriter().println("<th>");
+            resp.getWriter().println(product.getName());
+            resp.getWriter().println("</th>");
+            resp.getWriter().println("<th>");
+            resp.getWriter().println(product.getId());
+            resp.getWriter().println("</th>");
+            resp.getWriter().println("<th>");
+            resp.getWriter().println(product.getCost());
+            resp.getWriter().println("</th>");
+            resp.getWriter().println("</tr>");
+        }
+        resp.getWriter().println("</table>");
     }
 }
