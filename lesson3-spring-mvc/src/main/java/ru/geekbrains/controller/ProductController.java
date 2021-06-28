@@ -46,7 +46,7 @@ public class ProductController {
     @GetMapping("/{id}")
     public String editProduct(@PathVariable("id") Long id, Model model) {
         model.addAttribute("product", productRepository.findById(id));
-        return "edition_product_form";
+        return "product_form";
     }
 
     @PostMapping
