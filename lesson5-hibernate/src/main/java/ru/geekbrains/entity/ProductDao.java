@@ -1,53 +1,55 @@
 package ru.geekbrains.entity;
 
 import org.hibernate.cfg.Configuration;
-import ru.geekbrains.entity.Product;
 
 import javax.persistence.EntityManager;
+import javax.persistence.EntityManagerFactory;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * A class for working with a database with entities of the type Product.class
  */
 public class ProductDao {
-    private EntityManager em;
+    private EntityManagerFactory emFactory;
 
-    public ProductDao() {
-        em = new Configuration()
-                .configure("hibernate.cfg.xml")
-                .buildSessionFactory().createEntityManager();
+    public ProductDao(EntityManagerFactory emFactory) {
+        this.emFactory = emFactory;
     }
 
     /**
      * Finds product by id
+     *
      * @param id identity of entity
      * @return product, if exist, or null if not
      */
     public Product findById(Long id) {
-        return em.find(Product.class, id);
+        return executeForEntityManager(em -> em.find(Product.class, id));
     }
 
     /**
      * Finds all products
+     *
      * @return list of exists products
      */
     public List<Product> findAll() {
-        return em.createNamedQuery("allProducts", Product.class).getResultList();
+        return executeForEntityManager(em -> em.createNamedQuery("allProducts", Product.class).getResultList());
     }
 
     /**
      * Delete record from DB, if exist
+     *
      * @param id identity of entity
      */
     public void deleteById(Long id) {
-        em.getTransaction().begin();
-        Product product = em.find(Product.class, id);
-        if (product != null)
-            em.remove(product);
+        executeInTransaction(em -> em.createQuery("delete from Product p where p.id = :id")
+                .setParameter("id", id));
     }
 
     /**
      * Creates or updates a product record
+     *
      * @param product entity to be inserted
      * @return old product, if exist, or null if not
      */
@@ -57,23 +59,37 @@ public class ProductDao {
 
         // проверяем, существует ли сущность с данным id
         if (productId != null)
-            oldProduct = em.find(Product.class, productId);
+            oldProduct = findById(productId);
 
-        em.getTransaction().begin();
-        {
-            // если id свободен, создаем запись
-            if (oldProduct == null)
-                em.persist(product);
+        // если id свободен, создаем запись
+        if (oldProduct == null)
+            executeInTransaction(em -> em.persist(product));
             // иначе обновляем
-            else
-                em.merge(product);
-        }
-        em.getTransaction().commit();
+        else
+            executeInTransaction(em -> em.merge(product));
 
         return oldProduct;
     }
 
-    public void close() {
-        em.close();
+    private <R> R executeForEntityManager(Function<EntityManager, R> function) {
+        EntityManager em = emFactory.createEntityManager();
+        try {
+            return function.apply(em);
+        } finally {
+            em.close();
+        }
+    }
+
+    private void executeInTransaction(Consumer<EntityManager> consumer) {
+        EntityManager em = emFactory.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            consumer.accept(em);
+            em.getTransaction().commit();
+        } catch (Exception ignored) {
+            em.getTransaction().rollback();
+        } finally {
+            em.close();
+        }
     }
 }
