@@ -20,6 +20,7 @@
     <modules>
         <module>servlet-api</module>
         <module>spring-lesson2</module>
+        <module>lesson3-spring-mvc</module>
     </modules>
 
 </project>
