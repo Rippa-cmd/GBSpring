@@ -14,6 +14,10 @@ import ru.geekbrains.persist.Product;
 import ru.geekbrains.persist.ProductRepository;
 
 import javax.validation.Valid;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/product")
@@ -29,10 +33,27 @@ public class ProductController {
     }
 
     @GetMapping
-    public String listPage(Model model) {
+    public String listPage(Model model,
+                           @RequestParam("productNameFilter") Optional<String> productNameFilter,
+                           @RequestParam("minCostFilter") Optional<BigDecimal> minCostFilter,
+                           @RequestParam("maxCostFilter") Optional<BigDecimal> maxCostFilter) {
         logger.info("Product list page requested");
 
-        model.addAttribute("products", productRepository.findAll());
+        List<Product> products = productNameFilter.map(productRepository::findProductsByNameStartsWith).orElse(productRepository.findAll());
+
+        if (minCostFilter.isPresent())
+            products = products.stream().filter(product -> product.getCost().compareTo(minCostFilter.get()) >= 0).collect(Collectors.toList());
+
+        if (maxCostFilter.isPresent())
+            products = products.stream().filter(product -> product.getCost().compareTo(maxCostFilter.get()) <= 0).collect(Collectors.toList());
+//        List<Product> productsCost = minCostFilter.map( min -> maxCostFilter
+//                .map(max -> productRepository.findProductsByCostBetween(min, max))
+//                .orElse(productRepository.findProductsByCostGreaterThan(min)))
+//                .orElse(maxCostFilter.map(productRepository::findProductsByCostLessThan)
+//                        .orElse(productRepository.findAll()));
+//        List<Product> selectedProducts = productRepository.findAllFiltered(usernameFilter.get(), minCostFilter.get(), maxCostFilter.get());
+
+        model.addAttribute("products", products);
         return "products";
     }
 
@@ -76,7 +97,7 @@ public class ProductController {
     public String confirmedDelete(Long id) {
         logger.info("Confirmed deleting product - id" + id);
 
-        productRepository.delete(id);
+        productRepository.deleteById(id);
 
         return "redirect:/product";
     }

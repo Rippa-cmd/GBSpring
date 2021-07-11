@@ -23,6 +23,7 @@
         <module>lesson3-spring-mvc</module>
         <module>spring-boot-lesson4</module>
         <module>lesson5-hibernate</module>
+        <module>lesson6-hibernate-MTO</module>
     </modules>
 
 </project>
