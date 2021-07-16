@@ -3,21 +3,21 @@ package ru.geekbrains.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.ModelAndViewDefiningException;
 import ru.geekbrains.persist.Product;
 import ru.geekbrains.persist.ProductRepository;
+import ru.geekbrains.persist.ProductSpecifications;
 
 import javax.validation.Valid;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/product")
@@ -39,13 +39,13 @@ public class ProductController {
                            @RequestParam("maxCostFilter") Optional<BigDecimal> maxCostFilter) {
         logger.info("Product list page requested");
 
-        List<Product> products = productNameFilter.map(productRepository::findProductsByNameStartsWith).orElse(productRepository.findAll());
-
-        if (minCostFilter.isPresent())
-            products = products.stream().filter(product -> product.getCost().compareTo(minCostFilter.get()) >= 0).collect(Collectors.toList());
-
-        if (maxCostFilter.isPresent())
-            products = products.stream().filter(product -> product.getCost().compareTo(maxCostFilter.get()) <= 0).collect(Collectors.toList());
+//        List<Product> products = productNameFilter.map(productRepository::findProductsByNameStartsWith).orElse(productRepository.findAll());
+//
+//        if (minCostFilter.isPresent())
+//            products = products.stream().filter(product -> product.getCost().compareTo(minCostFilter.get()) >= 0).collect(Collectors.toList());
+//
+//        if (maxCostFilter.isPresent())
+//            products = products.stream().filter(product -> product.getCost().compareTo(maxCostFilter.get()) <= 0).collect(Collectors.toList());
 //        List<Product> productsCost = minCostFilter.map( min -> maxCostFilter
 //                .map(max -> productRepository.findProductsByCostBetween(min, max))
 //                .orElse(productRepository.findProductsByCostGreaterThan(min)))
@@ -53,6 +53,16 @@ public class ProductController {
 //                        .orElse(productRepository.findAll()));
 //        List<Product> selectedProducts = productRepository.findAllFiltered(usernameFilter.get(), minCostFilter.get(), maxCostFilter.get());
 
+        Specification<Product> spec = Specification.where(null);
+        if (productNameFilter.isPresent() && !productNameFilter.get().isBlank())
+            spec = spec.and(ProductSpecifications.productNamePrefix(productNameFilter.get()));
+
+        if (minCostFilter.isPresent())
+            spec = spec.and(ProductSpecifications.minCost(minCostFilter.get()));
+
+        if (maxCostFilter.isPresent())
+            spec = spec.and(ProductSpecifications.maxCost(maxCostFilter.get()));
+        List<Product> products = productRepository.findAll(spec);
         model.addAttribute("products", products);
         return "products";
     }
@@ -76,7 +86,7 @@ public class ProductController {
     public String update(@Valid Product product, BindingResult result) {
         logger.info("Saving product");
 
-        if(result.hasErrors())
+        if (result.hasErrors())
             return "product_form";
 
         productRepository.save(product);
