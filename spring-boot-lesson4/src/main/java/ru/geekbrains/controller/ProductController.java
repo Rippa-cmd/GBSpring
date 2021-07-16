@@ -3,6 +3,8 @@ package ru.geekbrains.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -15,6 +17,7 @@ import ru.geekbrains.persist.ProductRepository;
 import ru.geekbrains.persist.ProductSpecifications;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -27,6 +30,10 @@ public class ProductController {
 
     private final ProductRepository productRepository;
 
+    private Optional<Integer> defaultPageSize = Optional.of(3);
+
+    private Optional<Integer> defaultPagesCount = Optional.of(1);
+
     @Autowired
     private ProductController(ProductRepository productRepository) {
         this.productRepository = productRepository;
@@ -36,24 +43,14 @@ public class ProductController {
     public String listPage(Model model,
                            @RequestParam("productNameFilter") Optional<String> productNameFilter,
                            @RequestParam("minCostFilter") Optional<BigDecimal> minCostFilter,
-                           @RequestParam("maxCostFilter") Optional<BigDecimal> maxCostFilter) {
+                           @RequestParam("maxCostFilter") Optional<BigDecimal> maxCostFilter,
+                           @RequestParam("page") Optional<Integer> page,
+                           @RequestParam("size") Optional<Integer> size,
+                           @RequestParam("sort") Optional<String> sort) {
         logger.info("Product list page requested");
 
-//        List<Product> products = productNameFilter.map(productRepository::findProductsByNameStartsWith).orElse(productRepository.findAll());
-//
-//        if (minCostFilter.isPresent())
-//            products = products.stream().filter(product -> product.getCost().compareTo(minCostFilter.get()) >= 0).collect(Collectors.toList());
-//
-//        if (maxCostFilter.isPresent())
-//            products = products.stream().filter(product -> product.getCost().compareTo(maxCostFilter.get()) <= 0).collect(Collectors.toList());
-//        List<Product> productsCost = minCostFilter.map( min -> maxCostFilter
-//                .map(max -> productRepository.findProductsByCostBetween(min, max))
-//                .orElse(productRepository.findProductsByCostGreaterThan(min)))
-//                .orElse(maxCostFilter.map(productRepository::findProductsByCostLessThan)
-//                        .orElse(productRepository.findAll()));
-//        List<Product> selectedProducts = productRepository.findAllFiltered(usernameFilter.get(), minCostFilter.get(), maxCostFilter.get());
-
         Specification<Product> spec = Specification.where(null);
+        Sort sortConfiguration;
         if (productNameFilter.isPresent() && !productNameFilter.get().isBlank())
             spec = spec.and(ProductSpecifications.productNamePrefix(productNameFilter.get()));
 
@@ -62,8 +59,24 @@ public class ProductController {
 
         if (maxCostFilter.isPresent())
             spec = spec.and(ProductSpecifications.maxCost(maxCostFilter.get()));
-        List<Product> products = productRepository.findAll(spec);
-        model.addAttribute("products", products);
+
+        if (size.isPresent()) {
+            if (size.get() <= 0)
+                size = defaultPageSize;
+        } else size = defaultPageSize;
+
+        if (page.isPresent()) {
+            if (page.get() <= 0)
+                page = defaultPagesCount;
+        } else page = defaultPagesCount;
+
+        if (sort.isPresent() && !sort.get().isBlank())
+            sortConfiguration = Sort.by(sort.get());
+        else
+            sortConfiguration = Sort.by("id");
+
+        model.addAttribute("products", productRepository.findAll(spec,
+                PageRequest.of(page.get() - 1, size.get(), sortConfiguration)));
         return "products";
     }
 
