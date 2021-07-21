@@ -1,55 +1,18 @@
 package ru.geekbrains.persist;
 
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
-@Repository
-public class ProductRepository {
+public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 
-    private final Map<Long, Product> productMap = new ConcurrentHashMap<>();
+    List<Product> findProductsByNameStartsWith(String prefix);
 
-    private AtomicLong identity = new AtomicLong(0);
-
-    @PostConstruct
-    public void init() {
-        this.insert(new Product("Product 1", 100));
-        this.insert(new Product("Product 2", 200));
-        this.insert(new Product("Product 3", 300));
-    }
-
-    public List<Product> findAll() {
-        return new ArrayList<>(productMap.values());
-    }
-
-    public Optional<Product> findById(long id) {
-        return Optional.ofNullable(productMap.get(id));
-    }
-
-    public void insert(Product product) {
-        long id = identity.incrementAndGet();
-        product.setId(id);
-        productMap.put(id, product);
-    }
-
-    public void update(Product product) {
-        productMap.put(product.getId(), product);
-    }
-
-    public void save(Product product) {
-        if (product.getId() == null)
-            insert(product);
-        else
-            update(product);
-    }
-
-    public void delete(long id) {
-        productMap.remove(id);
-    }
+//    @Query(value = "select p from Product p where (p.name like CONCAT(:prefix, '%') or :prefix is null) " +
+//            "and (p.cost >= :minCost or :minCost is null) " +
+//            "and (p.cost <= :maxCost or :maxCost is null)")
+//    List<Product> findAllFiltered(@Param("prefix") String prefix,
+//                                  @Param("minCost") BigDecimal minCost,
+//                                  @Param("maxCost") BigDecimal maxCost);
 }

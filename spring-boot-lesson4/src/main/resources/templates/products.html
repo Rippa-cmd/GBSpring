@@ -38,6 +38,27 @@
             <a class="btn btn-primary" th:href="@{/product/new}">Add Product</a>
         </div>
 
+        <div class="col-12 mt-3">
+            <form class="form-inline" th:method="get">
+                <div class="form-group mb-2 mr-2">
+                    <label for="productNameFilter" class="sr-only">Product name filter</label>
+                    <input type="text" class="form-control" id="productNameFilter" th:value="${param.productNameFilter}"
+                           name="productNameFilter" placeholder="Product name filter">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="minCostFilter" class="sr-only">Minimum cost filter</label>
+                    <input type="number" step=".01" class="form-control" id="minCostFilter" th:value="${param.minCostFilter}"
+                           name="minCostFilter" placeholder="Minimum cost filter">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="maxCostFilter" class="sr-only">Maximum cost filter</label>
+                    <input type="number" step=".01" class="form-control" id="maxCostFilter" th:value="${param.maxCostFilter}"
+                           name="maxCostFilter" placeholder="Maximum cost filter">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Apply</button>
+            </form>
+        </div>
+
         <div class="col-12">
             <table class="table table-bordered my-2">
                 <thead>

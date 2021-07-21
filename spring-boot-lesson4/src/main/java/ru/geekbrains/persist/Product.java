@@ -1,25 +1,32 @@
 package ru.geekbrains.persist;
 
+import javax.persistence.*;
 import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.PositiveOrZero;
+import java.math.BigDecimal;
 
+@Entity
+@Table(name = "products")
 public class Product {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank
+    @Column(nullable = false)
     private String name;
 
     @PositiveOrZero
     @NotNull
-    private Integer cost;
+    @Column(nullable = false)
+    private BigDecimal cost;
 
     public Product() {
     }
 
-    public Product(String name, Integer cost) {
+    public Product(String name, BigDecimal cost) {
         this.name = name;
         this.cost = cost;
     }
@@ -40,11 +47,11 @@ public class Product {
         this.name = name;
     }
 
-    public Integer getCost() {
+    public BigDecimal getCost() {
         return cost;
     }
 
-    public void setCost(Integer cost) {
+    public void setCost(BigDecimal cost) {
         this.cost = cost;
     }
 }
