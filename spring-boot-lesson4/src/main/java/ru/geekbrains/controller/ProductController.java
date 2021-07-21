@@ -3,6 +3,9 @@ package ru.geekbrains.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,6 +17,10 @@ import ru.geekbrains.service.ProductSearchFilters;
 import ru.geekbrains.service.ProductService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Positive;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/product")
@@ -22,6 +29,10 @@ public class ProductController {
     private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
     private final ProductService productService;
+
+    private Optional<Integer> defaultPageSize = Optional.of(3);
+
+    private Optional<Integer> defaultPagesCount = Optional.of(1);
 
     @Autowired
     private ProductController(ProductService productService) {
