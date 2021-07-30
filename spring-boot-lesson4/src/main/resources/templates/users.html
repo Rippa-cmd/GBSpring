@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/default_headers :: default_head"></head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" th:replace="fragments/default_headers :: default_nav"></nav>
+
+<div class="container">
+    <div class="row py-2">
+        <div class="col-12">
+            <a class="btn btn-primary" th:href="@{/user/new}">Add User</a>
+        </div>
+
+        <div class="col-12 mt-3">
+            <form class="form-inline" th:method="get">
+                <div class="form-group mb-2 mr-2">
+                    <label for="productNameFilter" class="sr-only">Username filter</label>
+                    <input type="text" class="form-control" id="productNameFilter" th:value="${param.usernameFilter}"
+                           name="usernameFilter" placeholder="Username filter">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="minAgeFilter" class="sr-only">Minimum age filter</label>
+                    <input type="number" class="form-control" id="minAgeFilter"
+                           th:value="${param.minAgeFilter}"
+                           name="minCostFilter" placeholder="Minimum age filter">
+                </div>
+                <div class="form-group mb-2 mr-2">
+                    <label for="maxAgeFilter" class="sr-only">Maximum age filter</label>
+                    <input type="number" class="form-control" id="maxAgeFilter"
+                           th:value="${param.maxAgeFilter}"
+                           name="maxAgeFilter" placeholder="Maximum age filter">
+                </div>
+                <button type="submit" class="btn btn-primary mb-2">Apply</button>
+            </form>
+        </div>
+
+        <div class="col-12">
+            <table class="table table-bordered my-2">
+                <thead>
+                <tr>
+                    <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Id', 'id')"></th>
+                    <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Username', 'username')"></th>
+                    <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Age', 'age')"></th>
+                    <th scope="col">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${users.hasContent()}" th:each="user : ${users.content}">
+                    <th scope="row" th:text="${user.id}">1</th>
+                    <td th:text="${user.username}">Shoes</td>
+                    <td th:text="${user.age}">100</td>
+                    <td>
+                        <a class="btn btn-success" th:href="@{/user/{id}(id = ${user.id})}"><i
+                                class="fas fa-edit"></i></a>
+                        <a class="btn btn-danger" th:href="@{/user/delete_{id}(id = ${user.id})}"><i
+                                class="far fa-trash-alt"></i></a>
+                    </td>
+                </tr>
+
+                <tr th:unless="${users.hasContent()}">
+                    <td colspan="4">No users</td>
+
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="col-12">
+            <nav th:if="${users.hasContent()}" aria-label="...">
+                <ul class="pagination ">
+                    <li th:classappend="${!users.hasPrevious()} ? 'disabled'" class="page-item">
+                        <a class="page-link" th:href="@{/user(page=${users.number}, size=${users.size},
+                            usernameFilter=${param.usernameFilter},
+                            minAgeFilter=${param.minAgeFilter},
+                            maxAgeFilter=${param.maxAgeFilter},
+                            sortField=${param.sortField},
+                            sortDirection=${param.sortDirection})}" tabindex="-1">Previous</a>
+                    </li>
+
+                    <li th:each="num : ${#numbers.sequence(1, users.totalPages)}"
+                        th:classappend="${num == users.number + 1} ? 'active'" class="page-item">
+                        <a class="page-link"
+                           th:text="${num}"
+                           th:href="@{/user(page=${num}, size=${users.size},
+                           usernameFilter=${param.usernameFilter},
+                           minAgeFilter=${param.minAgeFilter},
+                           maxAgeFilter=${param.maxAgeFilter},
+                           sortField=${param.sortField},
+                           sortDirection=${param.sortDirection})}">1</a>
+                    </li>
+
+                    <li th:classappend="${!users.hasNext()} ? 'disabled'" class="page-item">
+                        <a class="page-link" th:href="@{/user(page=${users.number + 2}, size=${users.size},
+                            usernameFilter=${param.usernameFilter},
+                            minAgeFilter=${param.minAgeFilter},
+                            maxAgeFilter=${param.maxAgeFilter},
+                            sortField=${param.sortField},
+                            sortDirection=${param.sortDirection})}">Next</a>
+                    </li>
+                </ul>
+                <form class="form-inline" th:method="get">
+                    <div class="form-group mb-2 mr-2">
+                        <label for="size" class="sr-only">Size of page</label>
+                        <input type="number" class="form-control" id="size"
+                               th:value="${param.size}"
+                               name="size" placeholder="Page size">
+
+                        <a class="btn btn-primary" th:href="@{/user(page=1, size=${users.getTotalElements()},
+                            usernameFilter=${param.usernameFilter},
+                            minAgeFilter=${param.minAgeFilter},
+                            maxAgeFilter=${param.maxAgeFilter},
+                            sortField=${param.sortField},
+                            sortDirection=${param.sortDirection})}">All products</a>
+                    </div>
+                </form>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/default_headers :: default_scripts"></th:block>
+
+</body>
+</html>
