@@ -9,7 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-import ru.geekbrains.persist.User;
+import ru.geekbrains.persist.RoleRepository;
 import ru.geekbrains.service.UserSearchFilters;
 import ru.geekbrains.service.UserService;
 
@@ -24,13 +24,16 @@ public class UserController {
 
     private final UserService userService;
 
+    private final RoleRepository roleRepository;
+
     private Optional<Integer> defaultPageSize = Optional.of(3);
 
     private Optional<Integer> defaultPagesCount = Optional.of(1);
 
     @Autowired
-    private UserController(UserService userService) {
+    private UserController(UserService userService, RoleRepository roleRepository) {
         this.userService = userService;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping
@@ -46,6 +49,7 @@ public class UserController {
         logger.info("New user page requested");
 
         model.addAttribute("userDto", new UserDto());
+        model.addAttribute("roles", roleRepository.mapToRoleDto());
         return "user_form";
     }
 
@@ -53,18 +57,28 @@ public class UserController {
     public String editUser(@PathVariable("id") Long id, Model model) {
         model.addAttribute("userDto", userService.findById(id)
                 .orElseThrow(() -> new PageNotFoundException("User not found.")));
+        model.addAttribute("roles", roleRepository.mapToRoleDto());
         return "user_form";
     }
 
     @PostMapping
-    public String update(@Valid UserDto userDto, BindingResult result) {
+    public String update(@Valid UserDto userDto, BindingResult result, Model model) {
         logger.info("Saving user");
 
-        if (result.hasErrors())
+        if (result.hasErrors()) {
+            model.addAttribute("roles", roleRepository.mapToRoleDto());
             return "user_form";
+        }
 
         if (!userDto.checkPasswords()) {
+            model.addAttribute("roles", roleRepository.mapToRoleDto());
             result.rejectValue("matchPassword", "matchPassword", "Пароли не совпадают");
+            return "user_form";
+        }
+
+        if (userDto.getId()==null && userService.isUsernameBusy(userDto.getUsername())) {
+            model.addAttribute("roles", roleRepository.mapToRoleDto());
+            result.rejectValue("username", "username", "Логин уже занят");
             return "user_form";
         }
 
@@ -98,5 +112,4 @@ public class UserController {
         modelAndView.setStatus(HttpStatus.NOT_FOUND);
         return modelAndView;
     }
-
 }

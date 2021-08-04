@@ -1,5 +1,7 @@
 <!doctype html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 
 <head th:replace="fragments/default_headers :: default_head"></head>
 
@@ -9,8 +11,8 @@
 
 <div class="container">
     <div class="row py-2">
-        <div class="col-12">
-            <a class="btn btn-primary" th:href="@{/user/new}">Add User</a>
+        <div class="col-12" sec:authorize="hasAnyRole('SUPER_ADMIN')">
+            <a class="btn btn-primary" th:href="@{/user/new}" >Add User</a>
         </div>
 
         <div class="col-12 mt-3">
@@ -43,7 +45,7 @@
                     <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Id', 'id')"></th>
                     <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Username', 'username')"></th>
                     <th scope="col" th:replace="fragments/sort_headers :: user_sort_header('Age', 'age')"></th>
-                    <th scope="col">Actions</th>
+                    <th scope="col" sec:authorize="hasAnyRole('SUPER_ADMIN')">Actions</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -51,7 +53,7 @@
                     <th scope="row" th:text="${user.id}">1</th>
                     <td th:text="${user.username}">Shoes</td>
                     <td th:text="${user.age}">100</td>
-                    <td>
+                    <td sec:authorize="hasAnyRole('SUPER_ADMIN')">
                         <a class="btn btn-success" th:href="@{/user/{id}(id = ${user.id})}"><i
                                 class="fas fa-edit"></i></a>
                         <a class="btn btn-danger" th:href="@{/user/delete_{id}(id = ${user.id})}"><i

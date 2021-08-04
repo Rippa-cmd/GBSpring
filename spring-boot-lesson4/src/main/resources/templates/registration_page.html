@@ -10,21 +10,10 @@
 <div class="container">
     <div class="row py-2">
         <div class="col-12">
-            <form th:action="@{/user}" method="post" th:object="${userDto}">
+            <form th:action="@{/registration}" method="post" th:object="${userDto}">
                 <th:block th:replace="fragments/default_user_form :: default_user_form"></th:block>
-
-                <div class="form-group">
-                    <label for="roles">Roles</label>
-                    <select multiple class="form-control" id="roles" th:field="*{roles}" required>
-                        <option th:each="role : ${roles}"
-                                th:text="${role.name}"
-                                th:value="${role.id} + ';' + ${role.name}"
-                                th:selected="${userDto.roles?.contains(role)}"></option>
-                    </select>
-                </div>
-
                 <button type="submit" class="btn btn-primary">Submit</button>
-                <a class="btn btn-danger" th:href="@{/user}">Cancel</a>
+                <a class="btn btn-danger" th:href="@{/login}">Cancel</a>
             </form>
         </div>
     </div>

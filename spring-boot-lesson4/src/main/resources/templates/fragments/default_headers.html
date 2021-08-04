@@ -32,11 +32,19 @@
             </li>
         </ul>
 
-        <form sec:autorize="isAuthenticated()"
+        <form sec:authorize="isAuthenticated()"
         th:action="@{/logout}" th:method="post"
         class="form-inline my-2 my-lg-0">
             <button class="btn btn-outline-success my-2 my-sm-0">
                 Logout <span sec:authentication="principal.username"></span>
+            </button>
+        </form>
+
+        <form sec:authorize="!isAuthenticated()"
+              th:action="@{/login}" th:method="post"
+              class="form-inline my-2 my-lg-0">
+            <button class="btn btn-outline-success my-2 my-sm-0">
+                Login
             </button>
         </form>
     </div>
