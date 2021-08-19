@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+
+<head th:replace="fragments/default_headers :: default_head"></head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light" th:replace="fragments/default_headers :: default_nav"></nav>
+
+<div class="container">
+    <div class="row py-2">
+        <div class="col-12">
+            <form th:action="@{/user}" method="post" th:object="${userDto}">
+                <input type="hidden" id="id" th:field="*{id}">
+                <div class="form-group">
+                    <label>Username</label>
+                    <input type="text" class="form-control" id="username" th:field="*{username}"
+                           placeholder="Enter username">
+                    <p class="text-danger" th:if="${#fields.hasErrors('username')}" th:errors="*{username}"></p>
+                </div>
+                <div class="form-group">
+                    <label>Age</label>
+                    <input type="number" class="form-control" id="age" th:field="*{age}"
+                           placeholder="Enter age">
+                    <p class="text-danger" th:if="${#fields.hasErrors('age')}" th:errors="*{age}"></p>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" class="form-control" id="password" th:field="*{password}"
+                           placeholder="Enter password">
+                    <p class="text-danger" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></p>
+                </div>
+                <div class="form-group">
+                    <label>Repeat password</label>
+                    <input type="password" class="form-control" id="matchPassword" th:field="*{matchPassword}"
+                           placeholder="Enter password again">
+                    <p class="text-danger" th:if="${#fields.hasErrors('matchPassword')}" th:errors="*{matchPassword}"></p>
+                </div>
+                <button type="submit" class="btn btn-primary">Submit</button>
+                <a class="btn btn-danger" th:href="@{/user}">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+<th:block th:replace="fragments/default_headers :: default_scripts"></th:block>
+
+</body>
+</html>
