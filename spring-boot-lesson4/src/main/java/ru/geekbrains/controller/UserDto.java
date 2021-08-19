@@ -2,6 +2,7 @@ package ru.geekbrains.controller;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.PositiveOrZero;
+import java.util.Set;
 
 public class UserDto {
 
@@ -19,13 +20,16 @@ public class UserDto {
     @NotBlank
     private String matchPassword;
 
+    private Set<RoleDto> roles;
+
     public UserDto() {
     }
 
-    public UserDto(Long id, @NotBlank String username, @PositiveOrZero Integer age) {
+    public UserDto(Long id, @NotBlank String username, @PositiveOrZero Integer age, Set<RoleDto> roles) {
         this.id = id;
         this.username = username;
         this.age = age;
+        this.roles = roles;
     }
 
     public boolean checkPasswords() {
@@ -70,5 +74,13 @@ public class UserDto {
 
     public void setMatchPassword(String matchPassword) {
         this.matchPassword = matchPassword;
+    }
+
+    public Set<RoleDto> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<RoleDto> roles) {
+        this.roles = roles;
     }
 }

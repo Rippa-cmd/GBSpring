@@ -1,15 +1,12 @@
 package ru.geekbrains.persist;
 
-import org.hibernate.validator.constraints.UniqueElements;
-
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.PositiveOrZero;
-import java.math.BigDecimal;
+import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "users")
+@NamedEntityGraph(name = "GroupInfo.detail", attributeNodes = @NamedAttributeNode("roles"))
 public class User {
 
     @Id
@@ -25,14 +22,21 @@ public class User {
     @Column
     private String password;
 
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "users_roles",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "role_id"))
+    private Set<Role> roles;
+
     public User() {
     }
 
-    public User(Long id, String username, Integer age, String password) {
+    public User(Long id, String username, Integer age, String password, Set<Role> roles) {
         this.id = id;
         this.username = username;
         this.age = age;
         this.password = password;
+        this.roles = roles;
     }
 
     public Long getId() {
@@ -65,5 +69,29 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public Set<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return id.equals(user.id) &&
+                username.equals(user.username) &&
+                age.equals(user.age) &&
+                password.equals(user.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, age, password);
     }
 }
